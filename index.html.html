@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sujud Master - PAI Kelas 7 Interactive Game</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti for rewards -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emeraldCustom: '#059669',
+                        tealCustom: '#0d9488',
+                        goldCustom: '#f59e0b',
+                        softBackground: '#f0fdf4'
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        arabic: ['Amiri', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f0fdf4;
+            font-family: 'Poppins', sans-serif;
+            user-select: none;
+        }
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            direction: rtl;
+        }
+        .tab-btn.active {
+            background-color: #059669;
+            color: white;
+            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4);
+        }
+        .animate-bounce-short {
+            animation: bounce 0.8s ease-in-out 1;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .gradient-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between">
+
+    <!-- Header / Navbar -->
+    <header class="bg-emerald-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-amber-400 p-2.5 rounded-2xl text-emerald-900 font-extrabold text-xl shadow-md">
+                    <i class="fa-solid fa-hands-praying"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold tracking-wide">Sujud Master <span class="text-amber-300 text-xs md:text-sm font-normal">| Islamic Learning</span></h1>
+                    <p class="text-xs text-emerald-100">PAI Grade 7 • Guru: Devy Eka Angelica, M. Pd</p>
+                </div>
+            </div>
+
+            <!-- Score & Sound Control -->
+            <div class="flex items-center space-x-3 mt-2 md:mt-0">
+                <div class="bg-emerald-800/80 border border-emerald-500/50 px-3 py-1.5 rounded-full flex items-center space-x-2 text-sm font-semibold">
+                    <i class="fa-solid fa-star text-amber-300 animate-pulse"></i>
+                    <span>Score: <span id="userScore" class="text-amber-300">0</span> XP</span>
+                </div>
+                <button id="soundToggleBtn" onclick="toggleAudio()" class="bg-emerald-800 hover:bg-emerald-600 p-2 rounded-full text-white transition text-sm w-9 h-9 flex items-center justify-center">
+                    <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
+        
+        <!-- Welcome Greeting Banner -->
+        <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-6 text-white shadow-xl mb-6 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="absolute -right-6 -bottom-6 opacity-10 text-9xl">
+                <i class="fa-solid fa-mosque"></i>
+            </div>
+            <div class="relative z-10 max-w-xl">
+                <span class="bg-amber-400 text-emerald-950 text-xs font-extrabold uppercase px-3 py-1 rounded-full shadow-sm">
+                    ✨ Welcome Champions!
+                </span>
+                <h2 class="text-2xl md:text-3xl font-extrabold mt-2">Assalamu'alaikum, Young Muslim Leader! 👋</h2>
+                <p class="text-emerald-100 text-sm mt-1 leading-relaxed">
+                    Mari belajar <span class="font-semibold text-amber-200">3 Jenis Sujud</span> (Syukur, Sahwi, & Tilawah) bersama Ibu Guru dengan cara yang menyenangkan! Choose a topic below to start your adventure.
+                </p>
+            </div>
+
+            <!-- Teacher Profile Card -->
+            <div class="relative z-10 bg-white/10 backdrop-blur-md border border-white/20 p-3.5 rounded-2xl flex items-center gap-3.5 min-w-[260px] shadow-lg">
+                <div class="relative group cursor-pointer" onclick="document.getElementById('teacherPhotoInput').click()" title="Klik untuk mengunggah / mengganti foto Ibu Guru">
+                    <img id="teacherAvatar" src="bg putih_2.jpg" onerror="this.onerror=null; this.src='bg putih.jpg';" alt="Devy Eka Angelica, M. Pd" class="w-16 h-16 rounded-2xl object-cover border-2 border-amber-300 shadow-md">
+                    <span class="absolute -bottom-1 -right-1 bg-emerald-500 text-white text-[10px] p-1 rounded-full border border-white" title="Verified Teacher"><i class="fa-solid fa-circle-check"></i></span>
+                    <div class="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                </div>
+                <input type="file" id="teacherPhotoInput" accept="image/*" class="hidden" onchange="uploadTeacherPhoto(event)">
+                <div>
+                    <span class="bg-amber-300/30 text-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Guru Pengampu</span>
+                    <h3 class="text-sm font-bold text-white mt-0.5">Devy Eka Angelica, M. Pd</h3>
+                    <p class="text-[11px] text-emerald-100">Guru PAI Grade 7 SMP</p>
+                    <button onclick="document.getElementById('teacherPhotoInput').click()" class="text-[10px] text-amber-300 hover:text-amber-200 hover:underline mt-1 flex items-center gap-1 font-semibold">
+                        <i class="fa-solid fa-camera"></i> Upload Foto Saya
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex flex-wrap gap-2 justify-center mb-6 bg-white p-2 rounded-2xl shadow-sm border border-emerald-100">
+            <button onclick="switchTab('learnTab')" id="btn-learnTab" class="tab-btn active px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                <i class="fa-solid fa-book-open"></i>
+                <span>1. Learn & Compare <br><span class="text-[10px] opacity-80">(Materi & Tabel)</span></span>
+            </button>
+            <button onclick="switchTab('simTab')" id="btn-simTab" class="tab-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                <i class="fa-solid fa-person-praying"></i>
+                <span>2. Sujud Practice <br><span class="text-[10px] opacity-80">(Simulasi Latihan)</span></span>
+            </button>
+            <button onclick="switchTab('matchTab')" id="btn-matchTab" class="tab-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                <i class="fa-solid fa-puzzle-piece"></i>
+                <span>3. Case Matcher <br><span class="text-[10px] opacity-80">(Game Cari Pasangan)</span></span>
+            </button>
+            <button onclick="switchTab('quizTab')" id="btn-quizTab" class="tab-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                <i class="fa-solid fa-trophy"></i>
+                <span>4. Quiz Master <br><span class="text-[10px] opacity-80">(Kuis Interaktif)</span></span>
+            </button>
+        </nav>
+
+        <!-- TAB 1: LEARN & COMPARE -->
+        <section id="learnTab" class="space-y-8 tab-content">
+            <!-- 3 Sujud Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Card 1: Sujud Syukur -->
+                <div class="bg-white rounded-3xl p-5 border-2 border-emerald-100 hover:border-emerald-400 shadow-md transition transform hover:-translate-y-1 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">1. Gratitude</span>
+                            <span class="text-emerald-600 text-xl"><i class="fa-solid fa-heart"></i></span>
+                        </div>
+                        <h3 class="text-xl font-bold text-emerald-900">Sujud Syukur</h3>
+                        <p class="text-xs text-slate-500 font-medium mb-3">Prostration of Gratitude</p>
+                        
+                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 mb-3 space-y-2 text-xs">
+                            <p><strong class="text-emerald-700">💡 Alasan (Why):</strong> Ketika mendapat nikmat besar atau terhindar dari bahaya / <em>Receiving great blessings or saved from danger.</em></p>
+                            <p><strong class="text-emerald-700">📍 Tempat (Where):</strong> Di luar Shalat / <em>Outside Prayer.</em></p>
+                            <p><strong class="text-emerald-700">🔢 Jumlah:</strong> 1 kali sujud / <em>1 Prostration.</em></p>
+                        </div>
+
+                        <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-100 text-center">
+                            <p class="text-xs text-emerald-800 font-semibold mb-1">Bacaan / Recitation:</p>
+                            <p class="arabic-text text-lg text-emerald-950 my-1 font-bold">سَجَدَ وَجْهِيَ لِلَّذِي خَلَقَهُ وَصَوَّرَهُ</p>
+                            <p class="text-[11px] text-slate-600 italic">"Sajada wajhiya lilladzi khalaqahu wa sawwarahu..."</p>
+                        </div>
+                    </div>
+                    <button onclick="openDetailModal('syukur')" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-circle-info"></i> Tata Cara Lengkap
+                    </button>
+                </div>
+
+                <!-- Card 2: Sujud Sahwi -->
+                <div class="bg-white rounded-3xl p-5 border-2 border-amber-100 hover:border-amber-400 shadow-md transition transform hover:-translate-y-1 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">2. Forgetfulness</span>
+                            <span class="text-amber-600 text-xl"><i class="fa-solid fa-brain"></i></span>
+                        </div>
+                        <h3 class="text-xl font-bold text-amber-900">Sujud Sahwi</h3>
+                        <p class="text-xs text-slate-500 font-medium mb-3">Prostration of Forgetfulness</p>
+                        
+                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 mb-3 space-y-2 text-xs">
+                            <p><strong class="text-amber-700">💡 Alasan (Why):</strong> Lupa/ragu rakaat shalat atau lupa Tasyahud Awal / <em>Forgetfulness or doubt in prayer.</em></p>
+                            <p><strong class="text-amber-700">📍 Tempat (Where):</strong> Di akhir shalat (sebelum/sesudah salam) / <em>At the end of prayer.</em></p>
+                            <p><strong class="text-amber-700">🔢 Jumlah:</strong> 2 kali sujud / <em>2 Prostrations.</em></p>
+                        </div>
+
+                        <div class="bg-amber-50 p-3 rounded-2xl border border-amber-100 text-center">
+                            <p class="text-xs text-amber-800 font-semibold mb-1">Bacaan / Recitation:</p>
+                            <p class="arabic-text text-lg text-amber-950 my-1 font-bold">سُبْحَانَ مَنْ لَا يَنَامُ وَلَا يَسْهُو</p>
+                            <p class="text-[11px] text-slate-600 italic">"Subhana man la yanamu wa la yashu."</p>
+                        </div>
+                    </div>
+                    <button onclick="openDetailModal('sahwi')" class="mt-4 w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-circle-info"></i> Tata Cara Lengkap
+                    </button>
+                </div>
+
+                <!-- Card 3: Sujud Tilawah -->
+                <div class="bg-white rounded-3xl p-5 border-2 border-teal-100 hover:border-teal-400 shadow-md transition transform hover:-translate-y-1 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full">3. Recitation</span>
+                            <span class="text-teal-600 text-xl"><i class="fa-solid fa-book-quran"></i></span>
+                        </div>
+                        <h3 class="text-xl font-bold text-teal-900">Sujud Tilawah</h3>
+                        <p class="text-xs text-slate-500 font-medium mb-3">Prostration of Qur'an Recitation</p>
+                        
+                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 mb-3 space-y-2 text-xs">
+                            <p><strong class="text-teal-700">💡 Alasan (Why):</strong> Membaca atau mendengar Ayat Sajdah (🔍 tanda ۩) / <em>Reading or hearing a Sajdah verse.</em></p>
+                            <p><strong class="text-teal-700">📍 Tempat (Where):</strong> Dalam shalat atau Luar shalat / <em>Inside or outside prayer.</em></p>
+                            <p><strong class="text-teal-700">🔢 Jumlah:</strong> 1 kali sujud / <em>1 Prostration.</em></p>
+                        </div>
+
+                        <div class="bg-teal-50 p-3 rounded-2xl border border-teal-100 text-center">
+                            <p class="text-xs text-teal-800 font-semibold mb-1">Bacaan / Recitation:</p>
+                            <p class="arabic-text text-lg text-teal-950 my-1 font-bold">سَجَدَ وَجْهِيَ لِلَّذِي خَلَقَهُ وَشَقَّ سَمْعَهُ وَبَصَرَهُ</p>
+                            <p class="text-[11px] text-slate-600 italic">"Sajada wajhiya lilladzi khalaqahu wa shaqqa sam'ahu..."</p>
+                        </div>
+                    </div>
+                    <button onclick="openDetailModal('tilawah')" class="mt-4 w-full bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-circle-info"></i> Tata Cara Lengkap
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Comparison Table Section -->
+            <div class="bg-white rounded-3xl p-6 shadow-md border border-emerald-100">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="bg-emerald-100 p-2.5 rounded-xl text-emerald-700">
+                        <i class="fa-solid fa-table-list text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">📊 Tabel Perbandingan (Comparison Table)</h3>
+                        <p class="text-xs text-slate-500">Ringkasan cepat untuk membedakan ketiga jenis sujud dengan mudah.</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                        <thead>
+                            <tr class="bg-emerald-700 text-white rounded-t-xl">
+                                <th class="p-3 rounded-tl-xl font-semibold">Poin Pembeda (Aspect)</th>
+                                <th class="p-3 font-semibold">Sujud Syukur</th>
+                                <th class="p-3 font-semibold">Sujud Sahwi</th>
+                                <th class="p-3 rounded-tr-xl font-semibold">Sujud Tilawah</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-3 font-bold text-emerald-900 bg-emerald-50/50">Sebab Utama<br><span class="font-normal text-[10px] text-slate-500">(Reason)</span></td>
+                                <td class="p-3">Dapat nikmat besar / Terhindar dari musibah</td>
+                                <td class="p-3">Ragu/Lupa jumlah rakaat atau lupa Tasyahud Awal</td>
+                                <td class="p-3">Membaca/mendengar Ayat Sajdah (ada simbol ۩)</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-3 font-bold text-emerald-900 bg-emerald-50/50">Waktu Pelaksanaan<br><span class="font-normal text-[10px] text-slate-500">(Timing)</span></td>
+                                <td class="p-3"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-semibold">Luar Shalat Saja</span></td>
+                                <td class="p-3"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-semibold">Dalam Shalat Saja</span> (Di akhir)</td>
+                                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold">Dalam ATAU Luar Shalat</span></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-3 font-bold text-emerald-900 bg-emerald-50/50">Jumlah Sujud<br><span class="font-normal text-[10px] text-slate-500">(Prostration Count)</span></td>
+                                <td class="p-3 font-semibold text-emerald-700">1 Kali Sujud</td>
+                                <td class="p-3 font-semibold text-amber-700">2 Kali Sujud</td>
+                                <td class="p-3 font-semibold text-teal-700">1 Kali Sujud</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-3 font-bold text-emerald-900 bg-emerald-50/50">Syarat Suci<br><span class="font-normal text-[10px] text-slate-500">(Purity / Wudhu)</span></td>
+                                <td class="p-3">Wajib Suci & Menutup Aurat</td>
+                                <td class="p-3">Wajib Suci (Masih dalam shalat)</td>
+                                <td class="p-3">Wajib Suci & Menutup Aurat</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-3 font-bold text-emerald-900 bg-emerald-50/50">Hukum<br><span class="font-normal text-[10px] text-slate-500">(Islamic Ruling)</span></td>
+                                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-medium">Sunnah</span></td>
+                                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-medium">Sunnah Muakkad</span></td>
+                                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-medium">Sunnah</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: SUJUD PRACTICE SIMULATOR -->
+        <section id="simTab" class="space-y-6 tab-content hidden">
+            <div class="bg-white rounded-3xl p-6 shadow-md border border-emerald-100 text-center max-w-3xl mx-auto">
+                <span class="bg-emerald-100 text-emerald-800 text-xs font-extrabold uppercase px-3 py-1 rounded-full">
+                    🧘 Interactive Practice / Simulasi Langkah
+                </span>
+                <h3 class="text-xl font-bold text-slate-800 mt-2">Pilih Skenario dan Lakukan Sujud yang Benar!</h3>
+                <p class="text-xs text-slate-500 mb-6">Select a scenario below and follow the correct order of steps.</p>
+
+                <!-- Scenario Selector Buttons -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                    <button onclick="startSimulation('syukur')" id="sim-btn-syukur" class="p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50 hover:bg-emerald-100 font-bold text-xs text-emerald-900 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-500"></i>
+                        <span>Dapat Nilai 100 PAI!<br><span class="font-normal text-[10px]">(Sujud Syukur)</span></span>
+                    </button>
+                    <button onclick="startSimulation('sahwi')" id="sim-btn-sahwi" class="p-3 rounded-2xl border-2 border-slate-200 hover:bg-slate-50 font-bold text-xs text-slate-700 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                        <span>Lupa Tasyahud Awal!<br><span class="font-normal text-[10px]">(Sujud Sahwi)</span></span>
+                    </button>
+                    <button onclick="startSimulation('tilawah')" id="sim-btn-tilawah" class="p-3 rounded-2xl border-2 border-slate-200 hover:bg-slate-50 font-bold text-xs text-slate-700 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-book-open-reader text-emerald-500"></i>
+                        <span>Dengar Ayat Sajdah ۩!<br><span class="font-normal text-[10px]">(Sujud Tilawah)</span></span>
+                    </button>
+                </div>
+
+                <!-- Active Simulation Steps Display -->
+                <div id="simDisplayArea" class="bg-gradient-to-br from-emerald-900 to-teal-900 rounded-3xl p-6 text-white min-h-[300px] flex flex-col justify-between shadow-inner relative overflow-hidden">
+                    <div id="simStepHeader" class="flex justify-between items-center text-xs text-emerald-200 border-b border-emerald-700/60 pb-3">
+                        <span>Step <span id="currentStepNum" class="font-bold text-amber-400">1</span> of <span id="totalStepNum">4</span></span>
+                        <span id="simTypeTag" class="bg-emerald-700 px-3 py-1 rounded-full text-white font-semibold">Sujud Syukur</span>
+                    </div>
+
+                    <div class="my-6">
+                        <div id="simStepIcon" class="text-5xl text-amber-300 mb-3 animate-bounce-short">
+                            <i class="fa-solid fa-hands"></i>
+                        </div>
+                        <h4 id="simStepTitle" class="text-lg md:text-xl font-bold text-white mb-2">1. Niat & Takbiratul Ihram</h4>
+                        <p id="simStepDesc" class="text-xs md:text-sm text-emerald-100 max-w-md mx-auto leading-relaxed">
+                            Berdiri menghadap kiblat, berniat sujud syukur, dan mengucapkan Takbir ("Allahu Akbar").
+                        </p>
+                        
+                        <!-- Arabic Recitation inside step if available -->
+                        <div id="simArabicBox" class="mt-4 bg-emerald-800/60 border border-emerald-600/50 p-3 rounded-2xl hidden max-w-md mx-auto">
+                            <p id="simArabicText" class="arabic-text text-xl text-amber-200 font-bold">سَجَدَ وَجْهِيَ لِلَّذِي خَلَقَهُ</p>
+                            <p id="simLatinText" class="text-[11px] text-emerald-100 italic mt-1">"Sajada wajhiya lilladzi khalaqahu..."</p>
+                        </div>
+                    </div>
+
+                    <!-- Step Controls -->
+                    <div class="flex justify-between items-center pt-3 border-t border-emerald-700/60">
+                        <button onclick="prevSimStep()" id="prevStepBtn" class="bg-emerald-800 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded-xl disabled:opacity-40 font-semibold" disabled>
+                            <i class="fa-solid fa-arrow-left"></i> Previous
+                        </button>
+                        <div class="flex gap-1" id="simStepIndicators">
+                            <!-- Dots generated by JS -->
+                        </div>
+                        <button onclick="nextSimStep()" id="nextStepBtn" class="bg-amber-400 hover:bg-amber-500 text-emerald-950 text-xs px-5 py-2.5 rounded-xl font-extrabold transition shadow-lg flex items-center gap-1">
+                            Next Step <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TAB 3: SCENARIO MATCHER GAME -->
+        <section id="matchTab" class="space-y-6 tab-content hidden">
+            <div class="bg-white rounded-3xl p-6 shadow-md border border-emerald-100">
+                <div class="text-center max-w-xl mx-auto mb-6">
+                    <span class="bg-amber-100 text-amber-800 text-xs font-extrabold uppercase px-3 py-1 rounded-full">
+                        🧩 Mini Game 1: Match The Scenario
+                    </span>
+                    <h3 class="text-xl font-bold text-slate-800 mt-2">Pasangkan Kejadian dengan Jenis Sujudnya!</h3>
+                    <p class="text-xs text-slate-500">Klik satu kartu peristiwa di sebelah kiri, lalu klik jenis sujud yang sesuai di sebelah kanan!</p>
+                </div>
+
+                <!-- Matcher Game Board -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start max-w-4xl mx-auto">
+                    <!-- Left: Scenarios -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 text-center">👇 Peristiwa / Scenario</h4>
+                        <div id="scenarioList" class="space-y-3">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Sujud Options -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 text-center">👇 Jenis Sujud Target</h4>
+                        <div id="sujudOptionList" class="space-y-3">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Feedback Box -->
+                <div id="matchFeedback" class="mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center text-xs font-semibold hidden max-w-lg mx-auto">
+                    <span id="matchFeedbackText">Select a scenario to start matching!</span>
+                </div>
+
+                <div class="text-center mt-6">
+                    <button onclick="resetMatchGame()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl transition">
+                        <i class="fa-solid fa-rotate-right"></i> Reset Game
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: QUIZ MASTER -->
+        <section id="quizTab" class="space-y-6 tab-content hidden">
+            <div class="bg-white rounded-3xl p-6 shadow-md border border-emerald-100 max-w-2xl mx-auto">
+                
+                <!-- Quiz Header -->
+                <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                    <div>
+                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full">
+                            🏆 Sujud Master Challenge
+                        </span>
+                        <h3 class="text-lg font-bold text-slate-800 mt-1">Kuis Sujud Interaktif</h3>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 block">Question</span>
+                        <span class="text-emerald-700 font-extrabold text-lg"><span id="quizCurrentQ">1</span> / <span id="quizTotalQ">5</span></span>
+                    </div>
+                </div>
+
+                <!-- Question Box -->
+                <div id="quizQuestionContainer">
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-5">
+                        <p id="quizQuestionText" class="text-sm md:text-base font-bold text-slate-800 leading-snug">
+                            Ahmad baru saja menerima kabar bahwa ia menjuarai Lomba MTQ Tingkat Kabupaten Sidoarjo. Sujud apa yang sebaiknya dilakukan Ahmad?
+                        </p>
+                        <p id="quizQuestionSub" class="text-xs text-slate-500 mt-1 italic">
+                            (What kind of prostration should Ahmad perform after receiving good news?)
+                        </p>
+                    </div>
+
+                    <!-- Options Grid -->
+                    <div id="quizOptionsList" class="space-y-3">
+                        <!-- JS injects option buttons here -->
+                    </div>
+                </div>
+
+                <!-- Quiz Completion View (Hidden by default) -->
+                <div id="quizResultContainer" class="text-center py-6 hidden">
+                    <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center text-amber-500 text-4xl mx-auto mb-4 animate-bounce">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-emerald-900">Maa Syaa Allah! Extraordinary! 🎉</h3>
+                    <p class="text-xs text-slate-500 mt-1">Kamu telah menyelesaikan Kuis Sujud Master!</p>
+
+                    <div class="bg-emerald-50 rounded-2xl p-4 max-w-xs mx-auto my-5 border border-emerald-200">
+                        <p class="text-xs text-emerald-800 font-medium">Skor Akhir Kamu / Final Score:</p>
+                        <p id="finalQuizScore" class="text-3xl font-extrabold text-emerald-700 my-1">100 XP</p>
+                        <p id="quizBadgeTitle" class="text-xs font-bold text-amber-600">🌟 Gelar: Duta Sujud SMP Sidoarjo</p>
+                    </div>
+
+                    <div class="flex justify-center gap-3">
+                        <button onclick="restartQuiz()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition">
+                            <i class="fa-solid fa-rotate-right"></i> Coba Lagi
+                        </button>
+                        <button onclick="showCertificate()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition shadow-md">
+                            <i class="fa-solid fa-certificate"></i> Lihat Sertifikat
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Detail Modal Dialog -->
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-emerald-100 max-h-[90vh] overflow-y-auto relative animate-bounce-short">
+            <button onclick="closeDetailModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div id="modalContent">
+                <!-- JS will inject detail steps here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificate Modal -->
+    <div id="certModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border-4 border-amber-300 text-center relative overflow-hidden">
+            <button onclick="closeCertModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center z-10">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Certificate Design -->
+            <div class="border-2 border-emerald-600 p-6 rounded-2xl bg-gradient-to-b from-amber-50/50 via-white to-emerald-50/30">
+                <div class="text-emerald-700 text-3xl mb-1"><i class="fa-solid fa-award"></i></div>
+                <h4 class="text-xs uppercase font-extrabold tracking-widest text-amber-600">Sertifikat Penghargaan</h4>
+                <h3 class="text-xl font-extrabold text-emerald-950 mt-1">SUJUD MASTER CHAMPION</h3>
+                <p class="text-[10px] text-slate-500">Diberikan kepada siswa berprestasi PAI Kelas 7 SMP Swasta Sidoarjo:</p>
+
+                <div class="my-4">
+                    <input type="text" id="studentNameInput" placeholder="Ketik Nama Lengkapmu..." class="text-center font-bold text-lg text-emerald-900 border-b-2 border-emerald-500 focus:outline-none bg-transparent w-full max-w-xs py-1" value="Siswa Juara PAI">
+                </div>
+
+                <p class="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
+                    Telah menguasai materi dan tata cara <strong class="text-emerald-800">Sujud Syukur, Sujud Sahwi, dan Sujud Tilawah</strong> dengan nilai istimewa!
+                </p>
+
+                <div class="mt-6 pt-4 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-500">
+                    <div class="flex items-center gap-2">
+                        <img id="certTeacherAvatar" src="bg putih_2.jpg" onerror="this.onerror=null; this.src='bg putih.jpg';" alt="Devy Eka Angelica, M. Pd" class="w-10 h-10 rounded-full border border-emerald-600 object-cover shadow-sm">
+                        <div class="text-left">
+                            <p class="font-bold text-slate-800 text-xs">Devy Eka Angelica, M. Pd</p>
+                            <p class="italic text-emerald-700 font-medium">Guru PAI SMP Swasta Sidoarjo</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-emerald-700">PAI Interactive Canvas</p>
+                        <p>Grade 7 International Class</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="window.print()" class="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2">
+                <i class="fa-solid fa-print"></i> Cetak / Simpan Sertifikat
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-emerald-100 py-4 text-center text-xs text-slate-500 mt-8">
+        <p>Media Pembelajaran PAI Interaktif • SMP Swasta Sidoarjo © 2026</p>
+        <p class="text-[10px] text-slate-400 mt-0.5">Materi: Sujud Syukur, Sahwi, & Tilawah | Kelas 7 SMP</p>
+    </footer>
+
+    <script>
+        // Global State Variables
+        let userScore = 0;
+        let isAudioMuted = false;
+
+        // Function to upload custom teacher photo dynamically
+        function uploadTeacherPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgUrl = e.target.result;
+                    document.getElementById('teacherAvatar').src = imgUrl;
+                    document.getElementById('certTeacherAvatar').src = imgUrl;
+                    localStorage.setItem('teacherPhotoData', imgUrl);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Load saved photo from localStorage if present
+        function loadSavedTeacherPhoto() {
+            const savedPhoto = localStorage.getItem('teacherPhotoData');
+            if (savedPhoto) {
+                const avatar = document.getElementById('teacherAvatar');
+                const certAvatar = document.getElementById('certTeacherAvatar');
+                if (avatar) avatar.src = savedPhoto;
+                if (certAvatar) certAvatar.src = savedPhoto;
+            }
+        }
+
+        // Audio Effects Generator (Web Audio API Synthesizer - Standalone)
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+        }
+
+        function playSound(type) {
+            if (isAudioMuted) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.15); // E5
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.linearRampToValueAtTime(180, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.05);
+                } else if (type === 'fanfare') {
+                    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+                }
+            } catch (e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        function toggleAudio() {
+            isAudioMuted = !isAudioMuted;
+            const icon = document.getElementById('soundIcon');
+            if (isAudioMuted) {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-300';
+            } else {
+                icon.className = 'fa-solid fa-volume-high text-white';
+                playSound('click');
+            }
+        }
+
+        function addScore(points) {
+            userScore += points;
+            document.getElementById('userScore').innerText = userScore;
+        }
+
+        function switchTab(tabId) {
+            playSound('click');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-emerald-600', 'text-white');
+                btn.classList.add('bg-slate-100', 'text-slate-600');
+            });
+
+            document.getElementById(tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('active');
+            activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
+        }
+
+        const detailData = {
+            syukur: {
+                title: 'Sujud Syukur (Gratitude)',
+                color: 'text-emerald-700',
+                badge: 'bg-emerald-100 text-emerald-800',
+                steps: [
+                    '1. Suci dari hadats & najis serta menutup aurat.',
+                    '2. Menghadap Kiblat.',
+                    '3. Niat Sujud Syukur & Takbiratul Ihram ("Allahu Akbar").',
+                    '4. Langsung melakukan Sujud 1 kali.',
+                    '5. Membaca doa sujud syukur.',
+                    '6. Bangun dari sujud dan membaca Salam.'
+                ],
+                doa: 'سَجَدَ وَجْهِيَ لِلَّذِي خَلَقَهُ وَصَوَّرَهُ وَشَقَّ سَمْعَهُ وَبَصَرَهُ بِحَوْلِهِ وَقُوَّتِهِ',
+                latin: '"Sajada wajhiya lilladzi khalaqahu wa sawwarahu wa shaqqa sam\'ahu wa basharahu bihaulii wa quwwatihi."'
+            },
+            sahwi: {
+                title: 'Sujud Sahwi (Forgetfulness)',
+                color: 'text-amber-700',
+                badge: 'bg-amber-100 text-amber-800',
+                steps: [
+                    '1. Dilakukan saat akhir shalat (sebelum atau sesudah salam).',
+                    '2. Takbir dan melakukan Sujud Pertama.',
+                    '3. Membaca doa Sujud Sahwi.',
+                    '4. Duduk di antara dua sujud.',
+                    '5. Takbir dan Sujud Kedua (baca doa sahwi lagi).',
+                    '6. Duduk kembali dan mengucapkan Salam.'
+                ],
+                doa: 'سُبْحَانَ مَنْ لَا يَنَامُ وَلَا يَسْهُو',
+                latin: '"Subhana man la yanamu wa la yashu."'
+            },
+            tilawah: {
+                title: 'Sujud Tilawah (Quran Recitation)',
+                color: 'text-teal-700',
+                badge: 'bg-teal-100 text-teal-800',
+                steps: [
+                    '1. Dilakukan saat membaca/mendengar Ayat Sajdah (🔍 simbol ۩).',
+                    '2. Berdiri/Duduk menghadap kiblat.',
+                    '3. Niat Sujud Tilawah dan Takbir.',
+                    '4. Sujud 1 kali dan membaca doa sujud tilawah.',
+                    '5. Bangun dari sujud (jika dalam shalat, lanjut berdiri membaca ayat/ruku\').'
+                ],
+                doa: 'سَجَدَ وَجْهِيَ لِلَّذِي خَلَقَهُ وَشَقَّ سَمْعَهُ وَبَصَرَهُ بِحَوْلِهِ وَقُوَّتِهِ فَتَبَارَكَ اللهُ أَحْسَنُ الْخَالِقِينَ',
+                latin: '"Sajada wajhiya lilladzi khalaqahu wa shaqqa sam\'ahu wa basharahu..."'
+            }
+        };
+
+        function openDetailModal(type) {
+            playSound('click');
+            const data = detailData[type];
+            const modal = document.getElementById('detailModal');
+            const container = document.getElementById('modalContent');
+
+            container.innerHTML = `
+                <span class="${data.badge} text-xs font-bold px-3 py-1 rounded-full">Tata Cara Lengkap</span>
+                <h3 class="text-xl font-bold ${data.color} mt-2 mb-3">${data.title}</h3>
+                
+                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 mb-4 text-center">
+                    <p class="text-xs font-bold text-slate-600 mb-1">Bacaan Doa Sujud:</p>
+                    <p class="arabic-text text-xl font-bold text-slate-900 leading-loose">${data.doa}</p>
+                    <p class="text-xs italic text-slate-600 mt-1">${data.latin}</p>
+                </div>
+
+                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Urutan Langkah (Steps):</h4>
+                <ol class="space-y-2 text-xs text-slate-700 mb-4">
+                    ${data.steps.map(s => `<li class="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> ${s}</li>`).join('')}
+                </ol>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+
+        const simData = {
+            syukur: {
+                type: 'Sujud Syukur',
+                steps: [
+                    { title: '1. Niat & Takbir', desc: 'Menghadap Kiblat, berniat Sujud Syukur, lalu mengucap "Allahu Akbar".', icon: 'fa-hands-praying' },
+                    { title: '2. Sujud 1 Kali', desc: 'Sujud 1 kali dengan khusyuk sambil membaca doa syukur.', icon: 'fa-person-praying', arabic: 'سَجَدَ وَجْهِيَ لِلَّذِي خَلَقَهُ وَصَوَّرَهُ', latin: '"Sajada wajhiya lilladzi khalaqahu wa sawwarahu..."' },
+                    { title: '3. Duduk & Salam', desc: 'Bangun dari sujud, duduk sebentar lalu mengucap Salam ke kanan dan kiri.', icon: 'fa-child-reaching' }
+                ]
+            },
+            sahwi: {
+                type: 'Sujud Sahwi',
+                steps: [
+                    { title: '1. Sujud Pertama (Dalam Shalat)', desc: 'Sebelum/sesudah salam di akhir shalat, Takbir lalu sujud pertama.', icon: 'fa-person-praying', arabic: 'سُبْحَانَ مَنْ لَا يَنَامُ وَلَا يَسْهُو', latin: '"Subhana man la yanamu wa la yashu."' },
+                    { title: '2. Duduk Di Antara Dua Sujud', desc: 'Duduk sebentar dengan tenang (tuma\'ninah).', icon: 'fa-user' },
+                    { title: '3. Sujud Kedua', desc: 'Takbir dan Sujud Kedua dengan membaca doa sahwi kembali.', icon: 'fa-person-praying', arabic: 'سُبْحَانَ مَنْ لَا يَنَامُ وَلَا يَسْهُو', latin: '"Subhana man la yanamu wa la yashu."' },
+                    { title: '4. Duduk & Salam', desc: 'Duduk kembali lalu melakukan Salam untuk mengakhiri shalat.', icon: 'fa-circle-check' }
+                ]
+            },
+            tilawah: {
+                type: 'Sujud Tilawah',
+                steps: [
+                    { title: '1. Niat & Takbir', desc: 'Mendengar/membaca ayat Sajdah (۩), berniat sujud tilawah dan Takbir.', icon: 'fa-book-open-reader' },
+                    { title: '2. Sujud 1 Kali', desc: 'Sujud 1 kali membaca doa sujud tilawah.', icon: 'fa-person-praying', arabic: 'سَجَدَ وَجْهِيَ لِلَّذِي خَلَقَهُ وَشَقَّ سَمْعَهُ وَبَصَرَهُ', latin: '"Sajada wajhiya lilladzi khalaqahu..."' },
+                    { title: '3. Bangun / Salam', desc: 'Jika di luar shalat: Salam. Jika dalam shalat: Kembali berdiri melanjutkan bacaan ayat.', icon: 'fa-person' }
+                ]
+            }
+        };
+
+        let currentSimKey = 'syukur';
+        let currentSimStepIndex = 0;
+
+        function startSimulation(key) {
+            playSound('click');
+            currentSimKey = key;
+            currentSimStepIndex = 0;
+
+            // Highlight button
+            ['syukur', 'sahwi', 'tilawah'].forEach(k => {
+                const btn = document.getElementById('sim-btn-' + k);
+                if (k === key) {
+                    btn.className = 'p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50 font-bold text-xs text-emerald-900 transition flex items-center justify-center gap-2 shadow-sm';
+                } else {
+                    btn.className = 'p-3 rounded-2xl border-2 border-slate-200 hover:bg-slate-50 font-bold text-xs text-slate-700 transition flex items-center justify-center gap-2';
+                }
+            });
+
+            renderSimStep();
+        }
+
+        function renderSimStep() {
+            const data = simData[currentSimKey];
+            const step = data.steps[currentSimStepIndex];
+
+            document.getElementById('simTypeTag').innerText = data.type;
+            document.getElementById('currentStepNum').innerText = currentSimStepIndex + 1;
+            document.getElementById('totalStepNum').innerText = data.steps.length;
+
+            document.getElementById('simStepIcon').innerHTML = `<i class="fa-solid ${step.icon}"></i>`;
+            document.getElementById('simStepTitle').innerText = step.title;
+            document.getElementById('simStepDesc').innerText = step.desc;
+
+            const arabicBox = document.getElementById('simArabicBox');
+            if (step.arabic) {
+                arabicBox.classList.remove('hidden');
+                document.getElementById('simArabicText').innerText = step.arabic;
+                document.getElementById('simLatinText').innerText = step.latin;
+            } else {
+                arabicBox.classList.add('hidden');
+            }
+
+            // Buttons state
+            document.getElementById('prevStepBtn').disabled = (currentSimStepIndex === 0);
+            const nextBtn = document.getElementById('nextStepBtn');
+            if (currentSimStepIndex === data.steps.length - 1) {
+                nextBtn.innerHTML = `Selesai! <i class="fa-solid fa-check"></i>`;
+            } else {
+                nextBtn.innerHTML = `Next Step <i class="fa-solid fa-arrow-right"></i>`;
+            }
+        }
+
+        function nextSimStep() {
+            const data = simData[currentSimKey];
+            if (currentSimStepIndex < data.steps.length - 1) {
+                playSound('click');
+                currentSimStepIndex++;
+                renderSimStep();
+            } else {
+                playSound('correct');
+                playSound('fanfare');
+                addScore(20);
+                alert('Maa Syaa Allah! Kamu berhasil menyelesaikan latihan ' + data.type + '! (+20 XP)');
+            }
+        }
+
+        function prevSimStep() {
+            if (currentSimStepIndex > 0) {
+                playSound('click');
+                currentSimStepIndex--;
+                renderSimStep();
+            }
+        }
+
+        const matchScenarios = [
+            { id: 1, text: 'Menerima berita lulus ujian dengan nilai A+', target: 'syukur' },
+            { id: 2, text: 'Ragu apakah sudah rakaat ke-3 atau ke-4 saat Shalat Dzuhur', target: 'sahwi' },
+            { id: 3, text: 'Membaca Surah As-Sajdah ayat 15 yang memiliki simbol ۩', target: 'tilawah' },
+            { id: 4, text: 'Lupa tidak melakukan Tasyahud Awal saat Shalat Isya', target: 'sahwi' }
+        ];
+
+        let selectedScenario = null;
+        let matchedCount = 0;
+
+        function initMatchGame() {
+            matchedCount = 0;
+            selectedScenario = null;
+            const scenarioList = document.getElementById('scenarioList');
+            const sujudOptionList = document.getElementById('sujudOptionList');
+
+            scenarioList.innerHTML = matchScenarios.map(s => `
+                <div id="scen-${s.id}" onclick="selectScenario(${s.id})" class="p-3 bg-slate-50 border-2 border-slate-200 rounded-2xl cursor-pointer hover:border-emerald-400 transition text-xs font-semibold text-slate-800 flex items-center justify-between">
+                    <span>${s.text}</span>
+                    <i class="fa-regular fa-circle text-slate-300 status-icon"></i>
+                </div>
+            `).join('');
+
+            const sujudTypes = [
+                { type: 'syukur', title: 'Sujud Syukur', sub: '(Gratitude)' },
+                { type: 'sahwi', title: 'Sujud Sahwi', sub: '(Forgetfulness)' },
+                { type: 'tilawah', title: 'Sujud Tilawah', sub: '(Recitation)' }
+            ];
+
+            sujudOptionList.innerHTML = sujudTypes.map(st => `
+                <div onclick="selectSujudTarget('${st.type}')" class="p-3 bg-emerald-50 border-2 border-emerald-200 rounded-2xl cursor-pointer hover:bg-emerald-100 transition text-xs font-bold text-emerald-900 flex justify-between items-center">
+                    <span>${st.title} <span class="font-normal text-[10px] text-emerald-700">${st.sub}</span></span>
+                    <i class="fa-solid fa-arrow-right text-emerald-500"></i>
+                </div>
+            `).join('');
+        }
+
+        function selectScenario(id) {
+            playSound('click');
+            selectedScenario = matchScenarios.find(s => s.id === id);
+
+            matchScenarios.forEach(s => {
+                const el = document.getElementById('scen-' + s.id);
+                if (s.id === id) {
+                    el.className = 'p-3 bg-amber-50 border-2 border-amber-400 rounded-2xl cursor-pointer transition text-xs font-semibold text-amber-900 flex items-center justify-between shadow-sm';
+                } else if (!el.classList.contains('bg-emerald-100')) {
+                    el.className = 'p-3 bg-slate-50 border-2 border-slate-200 rounded-2xl cursor-pointer hover:border-emerald-400 transition text-xs font-semibold text-slate-800 flex items-center justify-between';
+                }
+            });
+
+            const fb = document.getElementById('matchFeedback');
+            fb.classList.remove('hidden');
+            document.getElementById('matchFeedbackText').innerText = `Terpilih: "${selectedScenario.text}". Sekarang pilih Jenis Sujud di kanan!`;
+        }
+
+        function selectSujudTarget(targetType) {
+            if (!selectedScenario) {
+                playSound('wrong');
+                alert('Pilih skenario di sebelah kiri terlebih dahulu!');
+                return;
+            }
+
+            const scenEl = document.getElementById('scen-' + selectedScenario.id);
+
+            if (selectedScenario.target === targetType) {
+                playSound('correct');
+                matchedCount++;
+                addScore(25);
+
+                scenEl.className = 'p-3 bg-emerald-100 border-2 border-emerald-500 rounded-2xl text-xs font-bold text-emerald-900 flex items-center justify-between pointer-events-none';
+                scenEl.querySelector('.status-icon').className = 'fa-solid fa-circle-check text-emerald-600';
+
+                document.getElementById('matchFeedbackText').innerText = `✅ Benar! "${selectedScenario.text}" adalah ${targetType.toUpperCase()}! (+25 XP)`;
+                selectedScenario = null;
+
+                if (matchedCount === matchScenarios.length) {
+                    playSound('fanfare');
+                    document.getElementById('matchFeedbackText').innerText = `🎉 Luar Biasa! Semua pasangan berhasil dicocokkan! (+100 XP Total)`;
+                }
+            } else {
+                playSound('wrong');
+                document.getElementById('matchFeedbackText').innerText = `❌ Kurang tepat, coba lagi ya! Pasangan untuk "${selectedScenario.text}" bukan itu.`;
+            }
+        }
+
+        function resetMatchGame() {
+            playSound('click');
+            initMatchGame();
+            document.getElementById('matchFeedback').classList.add('hidden');
+        }
+
+        const quizQuestions = [
+            {
+                q: 'Ahmad lupa melakukan Tasyahud Awal saat Shalat Dzuhur. Sebelum mengucap salam di akhir shalat, ia melakukan sujud 2 kali. Sujud apa ini?',
+                qSub: 'Ahmad forgot the 1st Tasyahud in Dzuhur prayer and performed 2 prostrations before salam. What sujud is this?',
+                options: ['Sujud Syukur', 'Sujud Sahwi', 'Sujud Tilawah', 'Sujud Rukun'],
+                answer: 1
+            },
+            {
+                q: 'Ketika membaca Al-Qur\'an, Siti menemukan simbol (۩) pada Surah Maryam ayat 58. Siti lalu bersujud 1 kali. Sujud apa yang dilakukan Siti?',
+                qSub: 'Siti reads Quran and finds Sajdah symbol (۩). She prostrates once. What sujud is this?',
+                options: ['Sujud Sahwi', 'Sujud Tilawah', 'Sujud Syukur', 'Sujud Sahat'],
+                answer: 1
+            },
+            {
+                q: 'Manakah jenis sujud yang HANYA boleh dilakukan di LUAR shalat?',
+                qSub: 'Which prostration can ONLY be performed OUTSIDE of prayer?',
+                options: ['Sujud Sahwi', 'Sujud Tilawah', 'Sujud Syukur', 'Semua Benar'],
+                answer: 2
+            },
+            {
+                q: 'Berapa kali jumlah sujud yang dilakukan saat Sujud Sahwi?',
+                qSub: 'How many prostrations are performed in Sujud Sahwi?',
+                options: ['1 Kali Sujud', '2 Kali Sujud', '3 Kali Sujud', '4 Kali Sujud'],
+                answer: 1
+            },
+            {
+                q: 'Apa bacaan utama ketika kita melakukan Sujud Sahwi?',
+                qSub: 'What is the main recitation in Sujud Sahwi?',
+                options: [
+                    'سُبْحَانَ مَنْ لَا يَنَامُ وَلَا يَسْهُو',
+                    'سُبْحَانَ رَبِّيَ الْأَعْلَى',
+                    'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ',
+                    'سُبْحَانَ رَبِّيَ الْعَظِيمِ'
+                ],
+                answer: 0
+            }
+        ];
+
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+
+        function loadQuizQuestion() {
+            const q = quizQuestions[currentQuizIndex];
+            document.getElementById('quizCurrentQ').innerText = currentQuizIndex + 1;
+            document.getElementById('quizTotalQ').innerText = quizQuestions.length;
+            document.getElementById('quizQuestionText').innerText = q.q;
+            document.getElementById('quizQuestionSub').innerText = q.qSub;
+
+            const optionsContainer = document.getElementById('quizOptionsList');
+            optionsContainer.innerHTML = q.options.map((opt, idx) => `
+                <button onclick="answerQuiz(${idx})" class="w-full text-left p-3.5 rounded-2xl border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 transition font-semibold text-xs text-slate-800 flex items-center justify-between group">
+                    <span><strong class="text-emerald-700 mr-2">${String.fromCharCode(65 + idx)}.</strong> ${opt}</span>
+                    <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-emerald-600"></i>
+                </button>
+            `).join('');
+        }
+
+        function answerQuiz(optionIdx) {
+            const q = quizQuestions[currentQuizIndex];
+            if (optionIdx === q.answer) {
+                playSound('correct');
+                quizScore += 20;
+                addScore(20);
+            } else {
+                playSound('wrong');
+            }
+
+            currentQuizIndex++;
+            if (currentQuizIndex < quizQuestions.length) {
+                loadQuizQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            playSound('fanfare');
+            document.getElementById('quizQuestionContainer').classList.add('hidden');
+            document.getElementById('quizResultContainer').classList.remove('hidden');
+            document.getElementById('finalQuizScore').innerText = quizScore + ' / 100 XP';
+        }
+
+        function restartQuiz() {
+            playSound('click');
+            currentQuizIndex = 0;
+            quizScore = 0;
+            document.getElementById('quizQuestionContainer').classList.remove('hidden');
+            document.getElementById('quizResultContainer').classList.add('hidden');
+            loadQuizQuestion();
+        }
+
+        function showCertificate() {
+            playSound('click');
+            document.getElementById('certModal').classList.remove('hidden');
+        }
+
+        function closeCertModal() {
+            document.getElementById('certModal').classList.add('hidden');
+        }
+
+        window.onload = function() {
+            // Load custom teacher photo if saved
+            loadSavedTeacherPhoto();
+            // Initialize Simulation
+            startSimulation('syukur');
+            // Initialize Match Game
+            initMatchGame();
+            // Initialize Quiz
+            loadQuizQuestion();
+        }
+    </script>
+</body>
+</html>
